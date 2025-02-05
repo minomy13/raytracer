@@ -7,7 +7,7 @@ pub enum TupleKind {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct Tuple(f64, f64, f64, f64);
+pub struct Tuple(pub f64, pub f64, pub f64, pub f64);
 
 impl ops::Add for Tuple {
     type Output = Tuple;
@@ -63,6 +63,7 @@ impl Tuple {
         Tuple(x, y, z, kind)
     }
 
+    // TODO: use operator overloading
     pub fn equals(&self, tuple: Tuple) -> bool {
         utils::float_eq(self.0, tuple.0)
             && utils::float_eq(self.1, tuple.1)
@@ -106,18 +107,6 @@ impl Tuple {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn tuple_with_w1_is_point() {
-        let tuple: Tuple = Tuple(0.0, 0.0, 0.0, 1.0);
-        assert_eq!(tuple.3, 1.0)
-    }
-
-    #[test]
-    fn tuple_with_w0_is_vector() {
-        let tuple: Tuple = Tuple(0.0, 0.0, 0.0, 0.0);
-        assert_eq!(tuple.3, 0.0)
-    }
 
     #[test]
     fn point_creates_tuples_with_w1() {
