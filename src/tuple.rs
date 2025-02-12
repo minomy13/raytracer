@@ -1,13 +1,20 @@
 use crate::utils;
-use std::ops;
+use std::{cmp, ops};
 
 pub enum TupleKind {
     Point,
     Vector,
 }
 
+pub enum Position {
+    X,
+    Y,
+    Z,
+    Kind,
+}
+
 #[derive(Clone, Copy, Debug)]
-pub struct Tuple(pub f64, pub f64, pub f64, pub f64);
+pub struct Tuple(f64, f64, f64, f64);
 
 impl ops::Add for Tuple {
     type Output = Tuple;
@@ -54,6 +61,32 @@ impl ops::Neg for Tuple {
     }
 }
 
+impl ops::Index<Position> for Tuple {
+    type Output = f64;
+    fn index(&self, index: Position) -> &Self::Output {
+        match index {
+            Position::X => {
+                return &self.0;
+            }
+            Position::Y => {
+                return &self.1;
+            }
+            Position::Z => {
+                return &self.2;
+            }
+            Position::Kind => {
+                return &self.3;
+            }
+        }
+    }
+}
+
+impl cmp::PartialEq for Tuple {
+    fn eq(&self, other: &Self) -> bool {
+        self.equals(*other)
+    }
+}
+
 impl Tuple {
     pub fn new(kind: TupleKind, x: f64, y: f64, z: f64) -> Tuple {
         let kind: f64 = match kind {
@@ -61,6 +94,10 @@ impl Tuple {
             TupleKind::Vector => 0.0,
         };
         Tuple(x, y, z, kind)
+    }
+
+    pub fn from(arr: [f64; 4]) -> Tuple {
+        Tuple(arr[0], arr[1], arr[2], arr[3])
     }
 
     // TODO: use operator overloading

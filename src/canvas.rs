@@ -19,7 +19,7 @@ impl Canvas {
 
     pub fn write_pixel(&mut self, x: usize, y: usize, color: Color) {
         self.validate_coordinates(x, y);
-        self.pixels[self.height - y - 1][x] = color;
+        self.pixels[y][x] = color;
     }
 
     // TODO: better use result?

@@ -1,7 +1,7 @@
 use raytracer::{
     canvas::Canvas,
     color::Color,
-    tuple::{Tuple, TupleKind},
+    tuple::{Position, Tuple, TupleKind},
 };
 
 const WIDTH: usize = 800;
@@ -41,15 +41,15 @@ fn main() {
         wind: Tuple::new(TupleKind::Vector, -0.01, 0.0, 0.0),
     };
 
-    while (projectile.position.0.round() as usize) < WIDTH {
+    while (projectile.position[Position::X].round() as usize) < WIDTH {
         println!(
             "{} at {}",
-            (projectile.position.1.round() as usize).clamp(0, HEIGHT - 1),
-            (projectile.position.0.round() as usize).clamp(0, WIDTH - 1)
+            (projectile.position[Position::Y].round() as usize).clamp(0, HEIGHT - 1),
+            (projectile.position[Position::X].round() as usize).clamp(0, WIDTH - 1)
         );
         canvas.write_pixel(
-            projectile.position.0.round() as usize,
-            (projectile.position.1.round() as usize).clamp(0, HEIGHT - 1),
+            projectile.position[Position::X].round() as usize,
+            (projectile.position[Position::Y].round() as usize).clamp(0, HEIGHT - 1),
             Color::new(0.0, 1.0, 0.0),
         );
         projectile = tick(environment, projectile);
