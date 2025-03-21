@@ -88,14 +88,25 @@ impl cmp::PartialEq for Tuple {
 }
 
 impl Tuple {
-    pub fn new(kind: TupleKind, x: f64, y: f64, z: f64) -> Tuple {
+    pub fn new(kind: TupleKind, x: f64, y: f64, z: f64) -> Self {
         let kind: f64 = match kind {
             TupleKind::Point => 1.0,
             TupleKind::Vector => 0.0,
         };
-        Tuple(x, y, z, kind)
+        Self(x, y, z, kind)
     }
 
+    // TESTME
+    pub fn new_point(x: f64, y: f64, z: f64) -> Self {
+        Self::new(TupleKind::Point, x, y, z)
+    }
+
+    // TESTME
+    pub fn new_vec(x: f64, y: f64, z: f64) -> Self {
+        Self::new(TupleKind::Vector, x, y, z)
+    }
+
+    // TESTME
     pub fn from(arr: [f64; 4]) -> Tuple {
         Tuple(arr[0], arr[1], arr[2], arr[3])
     }
