@@ -102,6 +102,11 @@ impl Tuple {
     }
 
     // TESTME
+    pub fn point_origin() -> Self {
+        Self::new(TupleKind::Point, 0.0, 0.0, 0.0)
+    }
+
+    // TESTME
     pub fn new_vec(x: f64, y: f64, z: f64) -> Self {
         Self::new(TupleKind::Vector, x, y, z)
     }
