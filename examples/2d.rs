@@ -1,4 +1,14 @@
-use raytracer::{body::{sphere::Sphere, Body}, canvas::Canvas, color::Color, matrix::Matrix, ray::{intersection::{find_hit, Intersection}, Ray}, tuple::Tuple};
+use raytracer::{
+    body::{sphere::Sphere, Body},
+    canvas::Canvas,
+    color::Color,
+    matrix::Matrix,
+    ray::{
+        intersection::{find_hit, Intersection},
+        Ray,
+    },
+    tuple::Tuple,
+};
 
 fn main() {
     let ray_origin = Tuple::new_point(0.0, 0.0, -5.0);
