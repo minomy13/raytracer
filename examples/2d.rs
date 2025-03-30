@@ -4,7 +4,7 @@ use raytracer::{
     color::Color,
     matrix::Matrix,
     ray::{
-        intersection::{find_hit, Intersection},
+        intersection::find_hit,
         Ray,
     },
     tuple::Tuple,
