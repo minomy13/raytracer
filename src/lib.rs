@@ -1,6 +1,7 @@
 #![cfg_attr(feature = "unstable", feature(generic_const_exprs))]
-pub mod body;
 #[allow(incomplete_features)]
+
+pub mod body;
 pub mod canvas;
 pub mod color;
 pub mod matrix;
