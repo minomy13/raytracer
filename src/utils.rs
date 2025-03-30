@@ -12,6 +12,5 @@ macro_rules! assert_f64_eq {
         assert!(float_eq(a, b))
     };
 }
-
 #[allow(unused_imports)]
 pub(crate) use assert_f64_eq;
