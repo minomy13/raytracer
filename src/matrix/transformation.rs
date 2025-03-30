@@ -1,6 +1,6 @@
 use super::Matrix;
 
-enum Axis {
+pub enum Axis {
     X,
     Y,
     Z,
@@ -8,7 +8,7 @@ enum Axis {
 
 impl Matrix<4, 4> {
     // TODO: consider switching to variadic macro
-    fn translation_matrix(x: f64, y: f64, z: f64) -> Self {
+    pub fn translation_matrix(x: f64, y: f64, z: f64) -> Self {
         let mut result = Matrix::identity_matrix();
         result[0][3] = x;
         result[1][3] = y;
@@ -16,7 +16,7 @@ impl Matrix<4, 4> {
         result
     }
 
-    fn scaling_matrix(x: f64, y: f64, z: f64) -> Self {
+    pub fn scaling_matrix(x: f64, y: f64, z: f64) -> Self {
         let mut result = Matrix::identity_matrix();
         result[0][0] = x;
         result[1][1] = y;
@@ -24,7 +24,7 @@ impl Matrix<4, 4> {
         result
     }
 
-    fn rotation_matrix(axis: Axis, rad: f64) -> Self {
+    pub fn rotation_matrix(axis: Axis, rad: f64) -> Self {
         let mut result = Matrix::identity_matrix();
 
         match axis {
@@ -51,7 +51,7 @@ impl Matrix<4, 4> {
         result
     }
 
-    fn shearing_matrix(xpy: f64, xpz: f64, ypx: f64, ypz: f64, zpx: f64, zpy: f64) -> Self {
+    pub fn shearing_matrix(xpy: f64, xpz: f64, ypx: f64, ypz: f64, zpx: f64, zpy: f64) -> Self {
         let mut result = Matrix::identity_matrix();
 
         result[0][1] = xpy;

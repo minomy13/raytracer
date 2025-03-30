@@ -22,6 +22,7 @@ impl Intersection {
     }
 }
 
+// TODO: move into `impl` block
 pub fn find_hit<'a>(intersections: &'a mut Vec<Intersection>) -> Option<&'a Intersection> {
     intersections.sort_by(|a, b| a.get_t().total_cmp(&b.get_t()));
     intersections.iter().find(|elm| elm.get_t() >= 0.0)

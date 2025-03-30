@@ -6,7 +6,7 @@ mod multiplication;
 mod transformation;
 
 #[derive(Debug, Clone, Copy)]
-struct Matrix<const R: usize, const C: usize>([[f64; C]; R]);
+pub struct Matrix<const R: usize, const C: usize>([[f64; C]; R]);
 
 impl<const R: usize, const C: usize> ops::Index<usize> for Matrix<R, C> {
     type Output = [f64; C];
@@ -173,7 +173,7 @@ impl Matrix<4, 4> {
         self.determinant() != 0.0
     }
 
-    fn inverse(&self) -> Self {
+    pub fn inverse(&self) -> Self {
         let mut result = Matrix::zero();
 
         // creating matrix of cofactors
