@@ -10,7 +10,7 @@ use crate::utils;
 /// Structure is `(red, green, blue)`.
 /// Addition `+`, subtraction `-` and multiplication by a scalar `* f64`,
 /// multiplication by another color `*` and equality `==` supported through operator overloading.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Color(f64, f64, f64);
 
 impl ops::Add for Color {
@@ -55,7 +55,15 @@ impl cmp::PartialEq for Color {
 
 impl Color {
     pub fn new(red: f64, green: f64, blue: f64) -> Self {
-        Color(red, green, blue)
+        Self(red, green, blue)
+    }
+
+    pub fn black() -> Self {
+        Self(0.0, 0.0, 0.0)
+    }
+
+    pub fn white() -> Self {
+        Self(1.0, 1.0, 1.0)
     }
 
     pub fn as_8bit(&self) -> (u8, u8, u8) {

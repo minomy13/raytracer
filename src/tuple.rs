@@ -155,6 +155,11 @@ impl Tuple {
             0.0,
         )
     }
+
+    pub fn reflect_at(&self, normal: Tuple) -> Self {
+        // TODO: check if vec? page 83
+        *self - normal * 2f64 * self.dot(normal)
+    }
 }
 
 #[cfg(test)]
@@ -304,5 +309,21 @@ mod tests {
         assert!(b
             .cross(a)
             .equals(Tuple::new(TupleKind::Vector, 1.0, -2.0, 1.0)));
+    }
+
+    #[test]
+    fn reflecting_vector_approaching_at_45deg() {
+        let v = Tuple::new_vec(1.0, -1.0, 0.0);
+        let n = Tuple::new_vec(0.0, 1.0, 0.0);
+        let r = v.reflect_at(n);
+        assert_eq!(r, Tuple::new_vec(1.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn reflecting_vector_off_slanted_surface() {
+        let v = Tuple::new_vec(0.0, -1.0, 0.0);
+        let n = Tuple::new_vec(2f64.sqrt() / 2.0, 2f64.sqrt() / 2.0, 0.0);
+        let r = v.reflect_at(n);
+        assert_eq!(r, Tuple::new_vec(1.0, 0.0, 0.0));
     }
 }

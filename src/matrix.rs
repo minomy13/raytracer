@@ -3,7 +3,7 @@ use std::{cmp, ops, usize};
 use crate::utils::float_eq;
 
 mod multiplication;
-mod transformation;
+pub mod transformation;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Matrix<const R: usize, const C: usize>([[f64; C]; R]);
@@ -69,7 +69,7 @@ impl Matrix<2, 2> {
 // TODO: use generic constant expressions asap, currently available with `unstable` feature enabled
 impl Matrix<3, 3> {
     #[cfg(not(feature = "unstable"))]
-    fn submatrix(&self, row: usize, column: usize) -> Matrix<2, 2> {
+    pub fn submatrix(&self, row: usize, column: usize) -> Matrix<2, 2> {
         let mut result = Matrix::zero();
 
         let mut rskip: usize = 0;
@@ -114,7 +114,7 @@ impl Matrix<3, 3> {
         result
     }
 
-    fn is_invertible(&self) -> bool {
+    pub fn is_invertible(&self) -> bool {
         // TODO: consider `float_eq()` function
         self.determinant() != 0.0
     }
@@ -123,7 +123,7 @@ impl Matrix<3, 3> {
 // TODO: use generic constant expressions asap, currently available with `unstable` feature enabled
 impl Matrix<4, 4> {
     #[cfg(not(feature = "unstable"))]
-    fn submatrix(&self, row: usize, column: usize) -> Matrix<3, 3> {
+    pub fn submatrix(&self, row: usize, column: usize) -> Matrix<3, 3> {
         let mut result = Matrix::zero();
 
         let mut rskip: usize = 0;
@@ -168,7 +168,7 @@ impl Matrix<4, 4> {
         result
     }
 
-    fn is_invertible(&self) -> bool {
+    pub fn is_invertible(&self) -> bool {
         // TODO: consider `float_eq()` function
         self.determinant() != 0.0
     }
@@ -210,7 +210,7 @@ impl<const R: usize, const C: usize> Matrix<R, C> {
         Matrix([[0.0; C]; R])
     }
 
-    fn transpose(&self) -> Matrix<C, R> {
+    pub fn transpose(&self) -> Matrix<C, R> {
         let mut result = Matrix::zero();
 
         for r in 0..R {

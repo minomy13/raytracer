@@ -64,21 +64,21 @@ impl Matrix<4, 4> {
         result
     }
 
-    fn translate(&self, x: f64, y: f64, z: f64) -> Self {
+    pub fn translate(&self, x: f64, y: f64, z: f64) -> Self {
         // TODO: check style, consider deref
         self * &Self::translation_matrix(x, y, z)
     }
 
-    fn scale(&self, x: f64, y: f64, z: f64) -> Self {
+    pub fn scale(&self, x: f64, y: f64, z: f64) -> Self {
         // TODO: check style, consider deref
         self * &Self::scaling_matrix(x, y, z)
     }
 
-    fn rotate(&self, axis: Axis, rad: f64) -> Self {
+    pub fn rotate(&self, axis: Axis, rad: f64) -> Self {
         self * &Self::rotation_matrix(axis, rad)
     }
 
-    fn shear(&self, xpy: f64, xpz: f64, ypx: f64, ypz: f64, zpx: f64, zpy: f64) -> Self {
+    pub fn shear(&self, xpy: f64, xpz: f64, ypx: f64, ypz: f64, zpx: f64, zpy: f64) -> Self {
         self * &Self::shearing_matrix(xpy, xpz, ypx, ypz, zpx, zpy)
     }
 }
