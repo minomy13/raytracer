@@ -1,15 +1,27 @@
-use uuid::Uuid;
+use crate::{body::Body, tuple::Tuple};
 
-#[derive(PartialEq, Clone, Copy, Debug)]
-pub struct Intersection {
+use super::Ray;
+
+#[derive(Clone, Copy)]
+pub struct Intersection<'a> {
     t: f64,
-    // TODO: consider switching to references
-    object_id: Uuid,
+    object: &'a dyn Body,
 }
 
-impl Intersection {
-    pub fn new(t: f64, object_id: Uuid) -> Self {
-        Self { t, object_id }
+impl<'a> Intersection<'a> {
+    pub fn new(t: f64, object: &'a dyn Body) -> Self {
+        Self { t, object }
+    }
+
+    pub fn prepare_computations(&self, ray: &Ray) -> Computations {
+        let point = ray.position(self.t);
+        Computations {
+            t: self.t,
+            object_id: self.object,
+            point: point,
+            eyev: -ray.get_direction(),
+            normalv: self.object.normal_at(point),
+        }
     }
 
     pub fn get_t(&self) -> f64 {
@@ -17,58 +29,80 @@ impl Intersection {
     }
 
     // TODO: consider better return type
-    pub fn get_object_id(&self) -> Uuid {
-        self.object_id
+    pub fn get_object(&self) -> &dyn Body {
+        self.object
     }
 
-    pub fn find_hit<'a>(intersections: &'a mut Vec<Intersection>) -> Option<&'a Intersection> {
+    pub fn find_hit(intersections: &'a mut Vec<Intersection>) -> Option<&'a Intersection<'a>> {
         // TODO: sort necessary here? should already be sorted
         intersections.sort_by(|a, b| a.get_t().total_cmp(&b.get_t()));
         intersections.iter().find(|elm| elm.get_t() >= 0.0)
     }
 }
 
+// TODO: is public right approach here?
+pub struct Computations<'a> {
+    pub t: f64,
+    pub object_id: &'a dyn Body,
+    pub point: Tuple,
+    pub eyev: Tuple,
+    pub normalv: Tuple,
+}
+
 // TODO: check page 64 - aggregating; substitute with `vec![]` at the moment
 
 #[cfg(test)]
 mod tests {
-    use crate::body::{sphere::Sphere, Body};
+    use crate::{
+        body::{sphere::Sphere, Body},
+        ray::Ray,
+        tuple::{point, vector},
+        utils::assert_f64_eq,
+    };
 
     use super::Intersection;
+
+    // TESTME
+    macro_rules! intersection_eq {
+        ($int1:expr, $int2:expr) => {
+            ($int1.get_t() == $int2.get_t())
+                && ($int1.get_object().get_id() == $int2.get_object().get_id())
+        };
+    }
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
         let s = Sphere::new();
-        let i = Intersection::new(3.5, s.get_id());
+        let i = Intersection::new(3.5, &s);
         assert_eq!(i.get_t(), 3.5);
-        assert_eq!(i.get_object_id(), s.get_id())
+        assert_eq!(i.get_object().get_id(), s.get_id())
     }
 
     #[test]
     fn hit_when_all_positive_t() {
         let s = Sphere::new();
-        let i1 = Intersection::new(1.0, s.get_id());
-        let i2 = Intersection::new(2.0, s.get_id());
+        let i1 = Intersection::new(1.0, &s);
+        let i2 = Intersection::new(2.0, &s);
         let mut xs = vec![i1, i2];
         let i = Intersection::find_hit(&mut xs);
-        assert_eq!(*i.unwrap(), i1)
+        assert!(intersection_eq!(i.unwrap(), i1))
     }
 
     #[test]
     fn hit_when_some_negative_t() {
         let s = Sphere::new();
-        let i1 = Intersection::new(-1.0, s.get_id());
-        let i2 = Intersection::new(1.0, s.get_id());
+        let i1 = Intersection::new(-1.0, &s);
+        let i2 = Intersection::new(1.0, &s);
         let mut xs = vec![i1, i2];
         let i = Intersection::find_hit(&mut xs);
-        assert_eq!(*i.unwrap(), i2)
+        assert!(intersection_eq!(i.unwrap(), i2))
     }
 
     #[test]
     fn hit_when_all_negative_t() {
         let s = Sphere::new();
-        let i1 = Intersection::new(-2.0, s.get_id());
-        let i2 = Intersection::new(-1.0, s.get_id());
+        let i1 = Intersection::new(-2.0, &s);
+        let i2 = Intersection::new(-1.0, &s);
         let mut xs = vec![i1, i2];
         let i = Intersection::find_hit(&mut xs);
         assert!(i.is_none())
@@ -77,12 +111,24 @@ mod tests {
     #[test]
     fn hit_always_lowest_nonnegative() {
         let s = Sphere::new();
-        let i1 = Intersection::new(5.0, s.get_id());
-        let i2 = Intersection::new(7.0, s.get_id());
-        let i3 = Intersection::new(-3.0, s.get_id());
-        let i4 = Intersection::new(2.0, s.get_id());
+        let i1 = Intersection::new(5.0, &s);
+        let i2 = Intersection::new(7.0, &s);
+        let i3 = Intersection::new(-3.0, &s);
+        let i4 = Intersection::new(2.0, &s);
         let mut xs = vec![i1, i2, i3, i4];
         let i = Intersection::find_hit(&mut xs);
-        assert_eq!(*i.unwrap(), i4)
+        assert!(intersection_eq!(i.unwrap(), i4))
+    }
+
+    #[test]
+    fn precomputing_state_of_intersection() {
+        let r = Ray::new(point!(0, 0, -5), vector!(0, 0, 1));
+        let shape = Sphere::new();
+        let i = Intersection::new(4.0, &shape);
+        let comps = i.prepare_computations(&r);
+        assert_f64_eq!(comps.t, i.get_t());
+        assert_eq!(comps.point, point!(0, 0, -1));
+        assert_eq!(comps.eyev, vector!(0, 0, -1));
+        assert_eq!(comps.normalv, vector!(0, 0, -1))
     }
 }

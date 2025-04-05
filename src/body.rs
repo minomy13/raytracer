@@ -18,6 +18,7 @@ pub trait Body {
     where
         Self: Sized;
     fn normal_at(&self, point: Tuple) -> Tuple;
+    // TODO: ID useful for anything other than testing?
     fn get_id(&self) -> Uuid;
     fn get_transformation(&self) -> Matrix<4, 4>;
     fn get_material(&self) -> Material;

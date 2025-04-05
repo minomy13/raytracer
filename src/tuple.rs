@@ -162,6 +162,20 @@ impl Tuple {
     }
 }
 
+macro_rules! point {
+    ($x:expr, $y:expr, $z:expr) => {
+        crate::tuple::Tuple::new_point($x as f64, $y as f64, $z as f64)
+    };
+}
+pub(crate) use point;
+
+macro_rules! vector {
+    ($x:expr, $y:expr, $z:expr) => {
+        crate::tuple::Tuple::new_vec($x as f64, $y as f64, $z as f64)
+    };
+}
+pub(crate) use vector;
+
 #[cfg(test)]
 mod tests {
     use super::*;

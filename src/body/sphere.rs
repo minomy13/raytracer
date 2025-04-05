@@ -38,8 +38,8 @@ impl Body for Sphere {
         let b = 2f64 * ray.get_direction().dot(sphere_to_ray);
 
         Some([
-            Intersection::new((-b - self.discriminant(&ray).sqrt()) / (2f64 * a), self.id),
-            Intersection::new((-b + self.discriminant(&ray).sqrt()) / (2f64 * a), self.id),
+            Intersection::new((-b - self.discriminant(&ray).sqrt()) / (2f64 * a), self),
+            Intersection::new((-b + self.discriminant(&ray).sqrt()) / (2f64 * a), self),
         ])
     }
 
@@ -183,8 +183,8 @@ mod tests {
         let s = Sphere::new();
         let xs = s.intersect(&r).unwrap();
         assert_eq!(xs.len(), 2);
-        assert_eq!(xs[0].get_object_id(), s.id);
-        assert_eq!(xs[1].get_object_id(), s.id)
+        assert_eq!(xs[0].get_object().get_id(), s.id);
+        assert_eq!(xs[1].get_object().get_id(), s.id)
     }
 
     #[test]
