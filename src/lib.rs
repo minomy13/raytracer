@@ -9,3 +9,4 @@ pub mod matrix;
 pub mod ray;
 pub mod tuple;
 mod utils;
+pub mod world;

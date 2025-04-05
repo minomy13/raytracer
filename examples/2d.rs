@@ -3,7 +3,7 @@ use raytracer::{
     canvas::Canvas,
     color::Color,
     matrix::Matrix,
-    ray::{intersection::find_hit, Ray},
+    ray::{intersection::Intersection, Ray},
     tuple::Tuple,
 };
 
@@ -29,9 +29,9 @@ fn main() {
             let position = Tuple::new_point(world_x, world_y, wall_z);
 
             let r = Ray::new(ray_origin, (position - ray_origin).normalize());
-            if let Some(xs) = shape.intersect(r) {
+            if let Some(xs) = shape.intersect(&r) {
                 let mut v = xs.to_vec();
-                if let Some(_hit) = find_hit(&mut v) {
+                if let Some(_hit) = Intersection::find_hit(&mut v) {
                     canvas.write_pixel(x, y, color);
                 }
             }

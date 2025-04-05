@@ -5,7 +5,7 @@ use raytracer::{
     light::{Light, PointLight},
     material::Material,
     matrix::Matrix,
-    ray::{intersection::find_hit, Ray},
+    ray::{intersection::Intersection, Ray},
     tuple::Tuple,
 };
 
@@ -39,7 +39,7 @@ fn main() {
             let r = Ray::new(ray_origin, (position - ray_origin).normalize());
             if let Some(xs) = shape.intersect(&r) {
                 let mut v = xs.to_vec();
-                if let Some(hit) = find_hit(&mut v) {
+                if let Some(hit) = Intersection::find_hit(&mut v) {
                     let hitpoint = r.position(hit.get_t());
                     let color = shape.get_material().lighting(
                         &light,

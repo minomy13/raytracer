@@ -1,11 +1,14 @@
 use crate::{color::Color, tuple::Tuple};
 
 pub trait Light {
-    fn new(position: Tuple, intensity: Color) -> Self;
+    fn new(position: Tuple, intensity: Color) -> Self
+    where
+        Self: Sized;
     fn get_intensity(&self) -> Color;
     fn get_position(&self) -> Tuple;
 }
 
+#[derive(PartialEq)]
 pub struct PointLight {
     intensity: Color,
     position: Tuple,

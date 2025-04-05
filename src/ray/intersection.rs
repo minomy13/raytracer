@@ -20,12 +20,12 @@ impl Intersection {
     pub fn get_object_id(&self) -> Uuid {
         self.object_id
     }
-}
 
-// TODO: move into `impl` block
-pub fn find_hit<'a>(intersections: &'a mut Vec<Intersection>) -> Option<&'a Intersection> {
-    intersections.sort_by(|a, b| a.get_t().total_cmp(&b.get_t()));
-    intersections.iter().find(|elm| elm.get_t() >= 0.0)
+    pub fn find_hit<'a>(intersections: &'a mut Vec<Intersection>) -> Option<&'a Intersection> {
+        // TODO: sort necessary here? should already be sorted
+        intersections.sort_by(|a, b| a.get_t().total_cmp(&b.get_t()));
+        intersections.iter().find(|elm| elm.get_t() >= 0.0)
+    }
 }
 
 // TODO: check page 64 - aggregating; substitute with `vec![]` at the moment
@@ -34,7 +34,7 @@ pub fn find_hit<'a>(intersections: &'a mut Vec<Intersection>) -> Option<&'a Inte
 mod tests {
     use crate::body::{sphere::Sphere, Body};
 
-    use super::{find_hit, Intersection};
+    use super::Intersection;
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
@@ -50,7 +50,7 @@ mod tests {
         let i1 = Intersection::new(1.0, s.get_id());
         let i2 = Intersection::new(2.0, s.get_id());
         let mut xs = vec![i1, i2];
-        let i = find_hit(&mut xs);
+        let i = Intersection::find_hit(&mut xs);
         assert_eq!(*i.unwrap(), i1)
     }
 
@@ -60,7 +60,7 @@ mod tests {
         let i1 = Intersection::new(-1.0, s.get_id());
         let i2 = Intersection::new(1.0, s.get_id());
         let mut xs = vec![i1, i2];
-        let i = find_hit(&mut xs);
+        let i = Intersection::find_hit(&mut xs);
         assert_eq!(*i.unwrap(), i2)
     }
 
@@ -70,7 +70,7 @@ mod tests {
         let i1 = Intersection::new(-2.0, s.get_id());
         let i2 = Intersection::new(-1.0, s.get_id());
         let mut xs = vec![i1, i2];
-        let i = find_hit(&mut xs);
+        let i = Intersection::find_hit(&mut xs);
         assert!(i.is_none())
     }
 
@@ -82,7 +82,7 @@ mod tests {
         let i3 = Intersection::new(-3.0, s.get_id());
         let i4 = Intersection::new(2.0, s.get_id());
         let mut xs = vec![i1, i2, i3, i4];
-        let i = find_hit(&mut xs);
+        let i = Intersection::find_hit(&mut xs);
         assert_eq!(*i.unwrap(), i4)
     }
 }
