@@ -1,10 +1,4 @@
-use crate::{point, 
-    canvas::Canvas,
-    matrix::Matrix,
-    ray::Ray,
-    tuple::Tuple,
-    world::World,
-};
+use crate::{canvas::Canvas, matrix::Matrix, point, ray::Ray, tuple::Tuple, world::World};
 
 pub struct Camera {
     hsize: usize,
@@ -108,11 +102,13 @@ impl Camera {
 mod tests {
     use std::f64::consts::PI;
 
-    use crate::{vector, point, 
+    use crate::{
         color::Color,
         matrix::{transformation::Axis, Matrix},
+        point,
         tuple::Tuple,
         utils::assert_f64_eq,
+        vector,
         world::World,
     };
 

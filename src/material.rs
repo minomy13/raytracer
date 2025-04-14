@@ -50,6 +50,7 @@ impl Material {
         position: Tuple,
         eyevector: Tuple,
         normalvector: Tuple,
+        in_shadow: bool,
     ) -> Color {
         let effective_color = self.color * light.get_intensity();
         let lightv = (light.get_position() - position).normalize();
@@ -76,7 +77,11 @@ impl Material {
             }
         }
 
-        ambient + diffuse + specular
+        if in_shadow {
+            ambient
+        } else {
+            ambient + diffuse + specular
+        }
     }
 
     pub fn set_color(&self, color: Color) -> Self {
@@ -137,7 +142,9 @@ mod tests {
     use crate::{
         color::Color,
         light::{Light, PointLight},
+        point,
         tuple::Tuple,
+        vector,
     };
 
     use super::Material;
@@ -159,7 +166,7 @@ mod tests {
         let eyev = Tuple::new_vec(0.0, 0.0, -1.0);
         let normalv = eyev.clone();
         let light = PointLight::new(Tuple::new_point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_eq!(result, Color::new(1.9, 1.9, 1.9))
     }
 
@@ -170,7 +177,7 @@ mod tests {
         let eyev = Tuple::new_vec(0.0, 2f64.sqrt() / 2.0, -2f64.sqrt() / 2.0);
         let normalv = Tuple::new_vec(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::new_point(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_eq!(result, Color::new(1.0, 1.0, 1.0))
     }
 
@@ -184,7 +191,7 @@ mod tests {
             Tuple::new_point(0.0, 10.0, -10.0),
             Color::new(1.0, 1.0, 1.0),
         );
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_eq!(result, Color::new(0.7364, 0.7364, 0.7364))
     }
 
@@ -198,7 +205,7 @@ mod tests {
             Tuple::new_point(0.0, 10.0, -10.0),
             Color::new(1.0, 1.0, 1.0),
         );
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_eq!(result, Color::new(1.6364, 1.6364, 1.6364))
     }
 
@@ -209,7 +216,18 @@ mod tests {
         let eyev = Tuple::new_vec(0.0, 0.0, -1.0);
         let normalv = eyev.clone();
         let light = PointLight::new(Tuple::new_point(0.0, 0.0, 10.0), Color::new(1.0, 1.0, 1.0));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
+        assert_eq!(result, Color::new(0.1, 0.1, 0.1))
+    }
+
+    #[test]
+    fn lighting_with_surface_in_shadow() {
+        let m = Material::default();
+        let position = Tuple::point_origin();
+        let eyev = vector!(0, 0, -1);
+        let normalv = eyev.clone();
+        let light = PointLight::new(point!(0, 0, -10), Color::white());
+        let result = m.lighting(&light, position, eyev, normalv, true);
         assert_eq!(result, Color::new(0.1, 0.1, 0.1))
     }
 }

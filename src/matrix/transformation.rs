@@ -109,10 +109,7 @@ impl Matrix<4, 4> {
 mod tests {
     use std::f64::consts::PI;
 
-    use crate::{vector, point, 
-        matrix::Matrix,
-        tuple::Tuple,
-    };
+    use crate::{matrix::Matrix, point, tuple::Tuple, vector};
 
     use super::Axis;
 

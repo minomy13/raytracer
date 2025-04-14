@@ -1,4 +1,4 @@
-use crate::{body::Body, tuple::Tuple};
+use crate::{body::Body, tuple::Tuple, utils::EPSILON};
 
 use super::Ray;
 
@@ -18,12 +18,14 @@ impl<'a> Intersection<'a> {
         let normalv = self.object.normal_at(point);
         let eyev = -ray.get_direction();
         let inside = normalv.dot(eyev) < 0f64;
+        let over_point = point + normalv * EPSILON;
         Computations {
             // TODO: copy just for convenience, consider ref
             t: self.t,
             inside,
             object: self.object,
             point,
+            over_point,
             eyev,
             normalv: if inside { -normalv } else { normalv },
         }
@@ -50,6 +52,7 @@ pub(crate) struct Computations<'a> {
     pub inside: bool,
     pub object: &'a dyn Body,
     pub point: Tuple,
+    pub over_point: Tuple,
     pub eyev: Tuple,
     pub normalv: Tuple,
 }
@@ -58,11 +61,14 @@ pub(crate) struct Computations<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{vector, point, 
+    use crate::{
         body::{sphere::Sphere, Body},
+        matrix::Matrix,
+        point,
         ray::Ray,
-        tuple::Tuple,
-        utils::assert_f64_eq,
+        tuple::{Position, Tuple},
+        utils::{assert_f64_eq, EPSILON},
+        vector,
     };
 
     use super::Intersection;
@@ -157,5 +163,15 @@ mod tests {
         assert!(comps.inside);
         // inverted because inside
         assert_eq!(comps.normalv, vector!(0, 0, -1))
+    }
+
+    #[test]
+    fn hit_should_offset_point() {
+        let r = Ray::new(point!(0, 0, -5), vector!(0, 0, 1));
+        let shape = Sphere::new().transform(Matrix::translation_matrix(0.0, 0.0, 1.0));
+        let i = Intersection::new(5.0, &shape);
+        let comps = i.prepare_computations(&r);
+        assert!(comps.over_point[Position::Z] < -EPSILON / 2.0);
+        assert!(comps.point[Position::Z] > comps.over_point[Position::Z])
     }
 }
