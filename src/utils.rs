@@ -7,9 +7,7 @@ pub fn float_eq(a: f64, b: f64) -> bool {
 #[allow(unused_macros)]
 macro_rules! assert_f64_eq {
     ($a:expr, $b:expr) => {
-        let a: f64 = $a;
-        let b: f64 = $b;
-        assert!(crate::utils::float_eq(a, b))
+        assert!(crate::utils::float_eq($a, $b))
     };
 }
 #[allow(unused_imports)]

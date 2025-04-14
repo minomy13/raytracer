@@ -58,10 +58,10 @@ pub(crate) struct Computations<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
+    use crate::{vector, point, 
         body::{sphere::Sphere, Body},
         ray::Ray,
-        tuple::{point, vector, Tuple},
+        tuple::Tuple,
         utils::assert_f64_eq,
     };
 

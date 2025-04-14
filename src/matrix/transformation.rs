@@ -68,10 +68,7 @@ impl Matrix<4, 4> {
 
     pub fn view_transform_matrix(from: Tuple, to: Tuple, up: Tuple) -> Self {
         let forward = (to - from).normalize();
-        println!("to - from: {:?}", (to - from));
-        println!("forward: {:?}", forward);
         let left = forward.cross(up.normalize());
-        println!("left: {:?}", left);
         let true_up = left.cross(forward);
 
         let mut orientation = Matrix::identity_matrix();
@@ -112,9 +109,9 @@ impl Matrix<4, 4> {
 mod tests {
     use std::f64::consts::PI;
 
-    use crate::{
+    use crate::{vector, point, 
         matrix::Matrix,
-        tuple::{point, vector, Tuple},
+        tuple::Tuple,
     };
 
     use super::Axis;
@@ -272,7 +269,7 @@ mod tests {
 
     #[test]
     fn arbitary_view_transformation() {
-        let from = point!(1, 2, 3);
+        let from = point!(1, 3, 2);
         let to = point!(4, -2, 8);
         let up = vector!(1, 1, 0);
         let t = Matrix::view_transform_matrix(from, to, up);

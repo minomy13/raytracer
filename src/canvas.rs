@@ -67,6 +67,12 @@ impl Canvas {
         file.write_all(self.construct_ppm().as_bytes())?;
         Ok(())
     }
+
+    // TESTME
+    pub fn pixel_at(&self, x: usize, y: usize) -> Color {
+        self.validate_coordinates(x, y);
+        self.pixels[x][y]
+    }
 }
 
 #[cfg(test)]

@@ -51,7 +51,7 @@ impl<const R: usize, const C: usize> cmp::PartialEq for Matrix<R, C> {
     fn eq(&self, other: &Self) -> bool {
         for r in 0..R {
             for c in 0..C {
-                if !(float_eq(self[r][c], other[r][c])) {
+                if !float_eq(self[r][c], other[r][c]) {
                     return false;
                 }
             }

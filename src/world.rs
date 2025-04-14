@@ -108,14 +108,7 @@ impl<'a> World<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        body::{sphere::Sphere, Body},
-        color::Color,
-        light::{Light, PointLight},
-        material::Material,
-        matrix::Matrix,
-        ray::{intersection::Intersection, Ray},
-        tuple::{point, vector, Tuple},
+    use crate::{body::{sphere::Sphere, Body}, color::Color, light::{Light, PointLight}, material::Material, matrix::Matrix, point, ray::{intersection::Intersection, Ray}, tuple::Tuple, vector
     };
 
     use super::World;
@@ -246,6 +239,7 @@ mod tests {
             ],
         };
         let r = Ray::new(point!(0, 0, 0.75), vector!(0, 0, -1));
+        // FIXME
         let c = w.color_at(r);
     }
 }
