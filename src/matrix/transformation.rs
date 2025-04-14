@@ -1,3 +1,5 @@
+use crate::tuple::{Position, Tuple};
+
 use super::Matrix;
 
 pub enum Axis {
@@ -64,6 +66,29 @@ impl Matrix<4, 4> {
         result
     }
 
+    pub fn view_transform_matrix(from: Tuple, to: Tuple, up: Tuple) -> Self {
+        let forward = (to - from).normalize();
+        println!("to - from: {:?}", (to - from));
+        println!("forward: {:?}", forward);
+        let left = forward.cross(up.normalize());
+        println!("left: {:?}", left);
+        let true_up = left.cross(forward);
+
+        let mut orientation = Matrix::identity_matrix();
+        orientation[0][0] = left[Position::X];
+        orientation[0][1] = left[Position::Y];
+        orientation[0][2] = left[Position::Z];
+        orientation[1][0] = true_up[Position::X];
+        orientation[1][1] = true_up[Position::Y];
+        orientation[1][2] = true_up[Position::Z];
+        orientation[2][0] = -forward[Position::X];
+        orientation[2][1] = -forward[Position::Y];
+        orientation[2][2] = -forward[Position::Z];
+
+        orientation
+            * Matrix::translation_matrix(-from[Position::X], -from[Position::Y], -from[Position::Z])
+    }
+
     pub fn translate(&self, x: f64, y: f64, z: f64) -> Self {
         // TODO: check style, consider deref
         self * &Self::translation_matrix(x, y, z)
@@ -87,7 +112,10 @@ impl Matrix<4, 4> {
 mod tests {
     use std::f64::consts::PI;
 
-    use crate::{matrix::Matrix, tuple::Tuple};
+    use crate::{
+        matrix::Matrix,
+        tuple::{point, vector, Tuple},
+    };
 
     use super::Axis;
 
@@ -213,5 +241,47 @@ mod tests {
 
         let transform_xpy = Matrix::shearing_matrix(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
         assert_eq!(transform_xpy * p, Tuple::new_point(2.0, 3.0, 7.0));
+    }
+
+    #[test]
+    fn transformation_matrix_for_default_orientation() {
+        let from = Tuple::point_origin();
+        let to = point!(0, 0, -1);
+        let up = vector!(0, 1, 0);
+        let t = Matrix::view_transform_matrix(from, to, up);
+        assert_eq!(t, Matrix::identity_matrix())
+    }
+
+    #[test]
+    fn view_transformation_matrix_looking_positive_z_direction() {
+        let from = Tuple::point_origin();
+        let to = point!(0, 0, 1);
+        let up = vector!(0, 1, 0);
+        let t = Matrix::view_transform_matrix(from, to, up);
+        assert_eq!(t, Matrix::scaling_matrix(-1.0, 1.0, -1.0))
+    }
+
+    #[test]
+    fn view_transformation_moves_world() {
+        let from = point!(0, 0, 8);
+        let to = Tuple::point_origin();
+        let up = vector!(0, 1, 0);
+        let t = Matrix::view_transform_matrix(from, to, up);
+        assert_eq!(t, Matrix::translation_matrix(0.0, 0.0, -8.0))
+    }
+
+    #[test]
+    fn arbitary_view_transformation() {
+        let from = point!(1, 2, 3);
+        let to = point!(4, -2, 8);
+        let up = vector!(1, 1, 0);
+        let t = Matrix::view_transform_matrix(from, to, up);
+        let result = Matrix::<4, 4>([
+            [-0.50709, 0.50709, 0.67612, -2.36643],
+            [0.76772, 0.60609, 0.12122, -2.82843],
+            [-0.35857, 0.59761, -0.71714, 0.00000],
+            [0.00000, 0.00000, 0.00000, 1.00000],
+        ]);
+        assert_eq!(t, result)
     }
 }

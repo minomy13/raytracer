@@ -3,7 +3,7 @@ use crate::{body::Body, tuple::Tuple};
 use super::Ray;
 
 #[derive(Clone, Copy)]
-pub struct Intersection<'a> {
+pub(crate) struct Intersection<'a> {
     t: f64,
     object: &'a dyn Body,
 }
@@ -15,12 +15,17 @@ impl<'a> Intersection<'a> {
 
     pub fn prepare_computations(&self, ray: &Ray) -> Computations {
         let point = ray.position(self.t);
+        let normalv = self.object.normal_at(point);
+        let eyev = -ray.get_direction();
+        let inside = normalv.dot(eyev) < 0f64;
         Computations {
+            // TODO: copy just for convenience, consider ref
             t: self.t,
-            object_id: self.object,
-            point: point,
-            eyev: -ray.get_direction(),
-            normalv: self.object.normal_at(point),
+            inside,
+            object: self.object,
+            point,
+            eyev,
+            normalv: if inside { -normalv } else { normalv },
         }
     }
 
@@ -28,7 +33,6 @@ impl<'a> Intersection<'a> {
         self.t
     }
 
-    // TODO: consider better return type
     pub fn get_object(&self) -> &dyn Body {
         self.object
     }
@@ -41,9 +45,10 @@ impl<'a> Intersection<'a> {
 }
 
 // TODO: is public right approach here?
-pub struct Computations<'a> {
+pub(crate) struct Computations<'a> {
     pub t: f64,
-    pub object_id: &'a dyn Body,
+    pub inside: bool,
+    pub object: &'a dyn Body,
     pub point: Tuple,
     pub eyev: Tuple,
     pub normalv: Tuple,
@@ -56,7 +61,7 @@ mod tests {
     use crate::{
         body::{sphere::Sphere, Body},
         ray::Ray,
-        tuple::{point, vector},
+        tuple::{point, vector, Tuple},
         utils::assert_f64_eq,
     };
 
@@ -129,6 +134,28 @@ mod tests {
         assert_f64_eq!(comps.t, i.get_t());
         assert_eq!(comps.point, point!(0, 0, -1));
         assert_eq!(comps.eyev, vector!(0, 0, -1));
+        assert_eq!(comps.normalv, vector!(0, 0, -1))
+    }
+
+    #[test]
+    fn hit_when_intersection_occurs_outside() {
+        let r = Ray::new(point!(0, 0, -5), vector!(0, 0, 1));
+        let shape = Sphere::new();
+        let i = Intersection::new(4.0, &shape);
+        let comps = i.prepare_computations(&r);
+        assert!(!comps.inside)
+    }
+
+    #[test]
+    fn hit_when_intersection_occurs_inside() {
+        let r = Ray::new(Tuple::point_origin(), vector!(0, 0, 1));
+        let shape = Sphere::new();
+        let i = Intersection::new(1.0, &shape);
+        let comps = i.prepare_computations(&r);
+        assert_eq!(comps.point, point!(0, 0, 1));
+        assert_eq!(comps.eyev, vector!(0, 0, -1));
+        assert!(comps.inside);
+        // inverted because inside
         assert_eq!(comps.normalv, vector!(0, 0, -1))
     }
 }

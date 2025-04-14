@@ -14,34 +14,42 @@ use crate::utils;
 pub struct Color(f64, f64, f64);
 
 impl ops::Add for Color {
-    type Output = Color;
+    type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Color(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
+        Self(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
+    }
+}
+
+impl ops::AddAssign for Color {
+    fn add_assign(&mut self, rhs: Self) {
+        self.0 += rhs.0;
+        self.1 += rhs.1;
+        self.2 += rhs.2;
     }
 }
 
 impl ops::Sub for Color {
-    type Output = Color;
+    type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Color(self.0 - rhs.0, self.1 - rhs.1, self.2 - rhs.2)
+        Self(self.0 - rhs.0, self.1 - rhs.1, self.2 - rhs.2)
     }
 }
 
 impl Mul<f64> for Color {
-    type Output = Color;
+    type Output = Self;
 
     fn mul(self, rhs: f64) -> Self::Output {
-        Color(self.0 * rhs, self.1 * rhs, self.2 * rhs)
+        Self(self.0 * rhs, self.1 * rhs, self.2 * rhs)
     }
 }
 
 impl Mul for Color {
-    type Output = Color;
+    type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Color(self.0 * rhs.0, self.1 * rhs.1, self.2 * rhs.2)
+        Self(self.0 * rhs.0, self.1 * rhs.1, self.2 * rhs.2)
     }
 }
 

@@ -44,9 +44,9 @@ impl Material {
     }
 
     // TODO: optimize
-    pub fn lighting<L: Light>(
+    pub fn lighting(
         &self,
-        light: &L,
+        light: &dyn Light,
         position: Tuple,
         eyevector: Tuple,
         normalvector: Tuple,

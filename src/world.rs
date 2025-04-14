@@ -4,16 +4,19 @@ use crate::{
     light::{Light, PointLight},
     material::Material,
     matrix::Matrix,
-    ray::{intersection::Intersection, Ray},
+    ray::{
+        intersection::{Computations, Intersection},
+        Ray,
+    },
     tuple::Tuple,
 };
 
-pub struct World {
-    lights: Vec<Box<dyn Light>>,
-    objects: Vec<Box<dyn Body>>,
+pub struct World<'a> {
+    lights: Vec<Box<dyn Light + 'a>>,
+    objects: Vec<Box<dyn Body + 'a>>,
 }
 
-impl World {
+impl<'a> World<'a> {
     pub fn new() -> Self {
         Self {
             lights: vec![],
@@ -41,7 +44,40 @@ impl World {
         }
     }
 
-    pub fn intersect(&self, ray: Ray) -> Vec<Intersection> {
+    pub fn color_at(&self, ray: Ray) -> Color {
+        let mut intersections = self.intersect(&ray);
+        let hit = Intersection::find_hit(&mut intersections);
+        match hit {
+            None => Color::black(),
+            Some(hit) => self.shade_hit(hit.prepare_computations(&ray)),
+        }
+    }
+
+    pub fn get_objects(&self) -> Vec<&dyn Body> {
+        self.objects.iter().map(|elm| elm.as_ref()).collect()
+    }
+
+    pub fn add_object<O: Body + 'a>(&mut self, object: O) -> &mut Self {
+        self.objects.push(Box::new(object));
+        self
+    }
+
+    pub fn get_lights(&self) -> Vec<&dyn Light> {
+        self.lights.iter().map(|elm| elm.as_ref()).collect()
+    }
+
+    pub fn add_light<L: Light + 'a>(&mut self, light: L) -> &mut Self {
+        self.lights.push(Box::new(light));
+        self
+    }
+
+    // TODO: check index
+    pub fn remove_light(&mut self, index: usize) -> &mut Self {
+        let _ = self.lights.remove(index);
+        self
+    }
+
+    fn intersect(&self, ray: &Ray) -> Vec<Intersection> {
         let mut intersections = vec![];
 
         for object in self.get_objects() {
@@ -54,12 +90,19 @@ impl World {
         intersections
     }
 
-    pub fn get_objects(&self) -> Vec<&dyn Body> {
-        self.objects.iter().map(|elm| elm.as_ref()).collect()
-    }
+    fn shade_hit(&self, precomputations: Computations) -> Color {
+        let mut color = Color::black();
 
-    pub fn get_lights(&self) -> Vec<&dyn Light> {
-        self.lights.iter().map(|elm| elm.as_ref()).collect()
+        for light in self.get_lights() {
+            color += precomputations.object.get_material().lighting(
+                light,
+                precomputations.point,
+                precomputations.eyev,
+                precomputations.normalv,
+            )
+        }
+
+        color
     }
 }
 
@@ -71,8 +114,8 @@ mod tests {
         light::{Light, PointLight},
         material::Material,
         matrix::Matrix,
-        ray::Ray,
-        tuple::Tuple,
+        ray::{intersection::Intersection, Ray},
+        tuple::{point, vector, Tuple},
     };
 
     use super::World;
@@ -127,11 +170,82 @@ mod tests {
             Tuple::new_point(0.0, 0.0, -5.0),
             Tuple::new_vec(0.0, 0.0, 1.0),
         );
-        let xs = w.intersect(r);
+        let xs = w.intersect(&r);
         assert_eq!(xs.len(), 4);
         assert_eq!(xs[0].get_t(), 4.0);
         assert_eq!(xs[1].get_t(), 4.5);
         assert_eq!(xs[2].get_t(), 5.5);
         assert_eq!(xs[3].get_t(), 6.0)
+    }
+
+    #[test]
+    fn shading_intersection() {
+        let w = World::default();
+        let r = Ray::new(point!(0, 0, -5), vector!(0, 0, 1));
+        let shape = *w.get_objects().first().unwrap();
+        let i = Intersection::new(4.0, shape);
+        let comps = i.prepare_computations(&r);
+        let c = w.shade_hit(comps);
+        assert_eq!(c, Color::new(0.38066, 0.47583, 0.2855))
+    }
+
+    #[test]
+    fn shading_intersection_from_inside() {
+        // TODO: why temporary dropped?
+        let mut w = World::default();
+        let w = w
+            .remove_light(0)
+            .add_light(PointLight::new(point!(0, 0.25, 0), Color::white()));
+        let r = Ray::new(Tuple::point_origin(), vector!(0, 0, 1));
+        let shape = *w.get_objects().last().unwrap();
+        let i = Intersection::new(0.5, shape);
+        let comps = i.prepare_computations(&r);
+        let c = w.shade_hit(comps);
+        assert_eq!(c, Color::new(0.90498, 0.90498, 0.90498))
+    }
+
+    #[test]
+    fn color_when_ray_misses() {
+        let w = World::default();
+        let r = Ray::new(point!(0, 0, -5), vector!(0, 1, 0));
+        let c = w.color_at(r);
+        assert_eq!(c, Color::black())
+    }
+
+    #[test]
+    fn color_when_ray_hits() {
+        let w = World::default();
+        let r = Ray::new(point!(0, 0, -5), vector!(0, 0, 1));
+        let c = w.color_at(r);
+        assert_eq!(c, Color::new(0.38066, 0.47583, 0.2855))
+    }
+
+    #[test]
+    fn color_with_intersection_behind_ray() {
+        // TODO: find way to use `World::default()` here
+        let w = World {
+            lights: vec![Box::new(PointLight::new(
+                Tuple::new_point(-10.0, 10.0, -10.0),
+                Color::white(),
+            ))],
+            objects: vec![
+                Box::new(
+                    Sphere::new().set_material(
+                        Material::default()
+                            .set_ambient(1.0)
+                            .set_color(Color::new(0.8, 1.0, 0.6))
+                            .set_diffuse(0.7)
+                            .set_specular(0.2),
+                    ),
+                ),
+                Box::new(
+                    Sphere::new()
+                        .set_material(Material::default().set_ambient(1.0))
+                        .transform(Matrix::scaling_matrix(0.5, 0.5, 0.5)),
+                ),
+            ],
+        };
+        let r = Ray::new(point!(0, 0, 0.75), vector!(0, 0, -1));
+        let c = w.color_at(r);
     }
 }
