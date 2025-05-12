@@ -59,7 +59,7 @@ impl Canvas {
     // TODO: check why having to use whole lib path
     pub fn save(&self) -> std::io::Result<()> {
         let path = format!(
-            "render-{}.ppm",
+            "renders/render-{}.ppm",
             chrono::Local::now().to_rfc3339().replace(":", "-")
         );
         println!("Saving to file {path} now ...");
