@@ -17,7 +17,10 @@ pub struct Sphere {
 }
 
 impl Body for Sphere {
-    fn new() -> Self {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
         Self {
             id: Uuid::new_v4(),
             transformation: Matrix::identity_matrix(),
@@ -51,7 +54,10 @@ impl Body for Sphere {
         self.transformation
     }
 
-    fn transform(&self, by: crate::matrix::Matrix<4, 4>) -> Self {
+    fn transform(&self, by: crate::matrix::Matrix<4, 4>) -> Self
+    where
+        Self: Sized,
+    {
         Self {
             transformation: self.transformation * by,
             ..*self
@@ -78,7 +84,10 @@ impl Body for Sphere {
         self.material
     }
 
-    fn set_material(&self, material: Material) -> Self {
+    fn set_material(&self, material: Material) -> Self
+    where
+        Self: Sized,
+    {
         Self { material, ..*self }
     }
 }

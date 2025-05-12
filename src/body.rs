@@ -7,13 +7,14 @@ use crate::{
     tuple::Tuple,
 };
 
+pub mod plane;
 pub mod sphere;
 
 pub trait Body {
     fn new() -> Self
     where
         Self: Sized;
-    fn intersect(&self, ray: &Ray) -> Option<[Intersection; 2]>;
+    fn intersect(&self, ray: &Ray) -> Option<[Intersection; 2]>; // TODO: change to array slice
     fn transform(&self, by: Matrix<4, 4>) -> Self
     where
         Self: Sized;
